@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDI Volume Editor by Gogogadgetjustice @ gmail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            border-color: #4facfe;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .file-input-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .file-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .file-item {
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 3px solid #4facfe;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .volume-display {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: #2d5016;
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, #ff6b6b, #ffa8a8);
+            color: #8b0000;
+        }
+
+        .status.info {
+            background: linear-gradient(135deg, #4facfe, #a8e6ff);
+            color: #0066cc;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .processing {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵  MIDI Volume Wizard            </h1>
+            <p>Adjust volume levels and save your MIDI files.</p>
+            <p>by your pal GoGo Gadget Jusice.</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2><span class="icon">📁</span>Select MIDI Files</h2>
+                <div class="file-input-container">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="fileInput" class="file-input" accept=".mid,.midi" multiple>
+                        <label for="fileInput" class="file-input-label">
+                            📄 Choose MIDI Files
+                        </label>
+                    </div>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="folderInput" class="file-input" webkitdirectory multiple>
+                        <label for="folderInput" class="file-input-label">
+                            📂 Choose Folder
+                        </label>
+                    </div>
+                </div>
+                <div id="fileList" class="file-list" style="display: none;"></div>
+            </div>
+
+            <div class="section">
+                <h2><span class="icon">🔊</span>Volume Control</h2>
+                <div class="volume-control">
+                    <span>🔇</span>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="200" value="100">
+                    <span>🔊</span>
+                    <div id="volumeDisplay" class="volume-display">100%</div>
+                </div>
+                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                    Adjust the volume multiplier (0% = silent mime , 100% = original, 200% = double volume clowning)
+                </p>
+            </div>
+
+            <div class="section">
+                <h2><span class="icon">💾</span>Process & Save</h2>
+                <button id="processBtn" class="btn" disabled>Process MIDI Files</button>
+                <div id="status" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let volumeMultiplier = 1.0;
+
+        const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
+        const fileList = document.getElementById('fileList');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeDisplay = document.getElementById('volumeDisplay');
+        const processBtn = document.getElementById('processBtn');
+        const status = document.getElementById('status');
+
+        fileInput.addEventListener('change', handleFileSelection);
+        folderInput.addEventListener('change', handleFileSelection);
+        volumeSlider.addEventListener('input', updateVolume);
+        processBtn.addEventListener('click', processFiles);
+
+        function handleFileSelection(e) {
+            const files = Array.from(e.target.files).filter(file => 
+                file.name.toLowerCase().endsWith('.mid') || file.name.toLowerCase().endsWith('.midi')
+            );
+            
+            selectedFiles = files;
+            displayFileList();
+            updateProcessButton();
+        }
+
+        function displayFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+
+            fileList.style.display = 'block';
+            fileList.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <span style="color: #666; font-size: 0.9em;">${formatFileSize(file.size)}</span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateVolume() {
+            const value = volumeSlider.value;
+            volumeMultiplier = value / 100;
+            volumeDisplay.textContent = value + '%';
+        }
+
+        function updateProcessButton() {
+            processBtn.disabled = selectedFiles.length === 0;
+        }
+
+        function showStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        async function processFiles() {
+            if (selectedFiles.length === 0) return;
+
+            processBtn.disabled = true;
+            processBtn.classList.add('processing');
+            showStatus(`Processing ${selectedFiles.length} MIDI file(s)...`, 'info');
+
+            try {
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    showStatus(`Processing ${file.name} (${i + 1}/${selectedFiles.length})...`, 'info');
+                    
+                    const arrayBuffer = await file.arrayBuffer();
+                    const modifiedBuffer = adjustMidiVolume(arrayBuffer, volumeMultiplier);
+                    
+                    const blob = new Blob([modifiedBuffer], { type: 'audio/midi' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name.replace(/\.(mid|midi)$/i, `_vol${Math.round(volumeMultiplier * 100)}.$1`);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+
+                showStatus(`Successfully processed ${selectedFiles.length} MIDI file(s)!`, 'success');
+            } catch (error) {
+                console.error('Error processing files:', error);
+                showStatus('Error processing MIDI files. Please try again.', 'error');
+            } finally {
+                processBtn.disabled = false;
+                processBtn.classList.remove('processing');
+            }
+        }
+
+        function adjustMidiVolume(arrayBuffer, multiplier) {
+            const data = new Uint8Array(arrayBuffer);
+            const result = new Uint8Array(data.length);
+            result.set(data);
+
+            // Parse MIDI file structure
+            let offset = 0;
+            
+            // Check for MIDI header
+            if (offset + 14 > result.length || 
+                result[offset] !== 0x4D || result[offset+1] !== 0x54 || 
+                result[offset+2] !== 0x68 || result[offset+3] !== 0x64) {
+                console.error('Not a valid MIDI file');
+                return result.buffer;
+            }
+            
+            // Skip header chunk
+            const headerLength = (result[4] << 24) | (result[5] << 16) | (result[6] << 8) | result[7];
+            offset = 8 + headerLength;
+            
+            console.log(`Processing MIDI with volume multiplier: ${multiplier}`);
+            let eventsModified = 0;
+            
+            // Process each track
+            while (offset < result.length - 8) {
+                // Check for track header
+                if (result[offset] === 0x4D && result[offset+1] === 0x54 && 
+                    result[offset+2] === 0x72 && result[offset+3] === 0x6B) {
+                    
+                    const trackLength = (result[offset+4] << 24) | (result[offset+5] << 16) | 
+                                      (result[offset+6] << 8) | result[offset+7];
+                    const trackStart = offset + 8;
+                    const trackEnd = trackStart + trackLength;
+                    
+                    console.log(`Processing track, length: ${trackLength} bytes`);
+                    
+                    let pos = trackStart;
+                    let runningStatus = 0;
+                    
+                    while (pos < trackEnd) {
+                        // Read variable-length delta time
+                        let deltaTime = 0;
+                        let byte;
+                        do {
+                            if (pos >= trackEnd) break;
+                            byte = result[pos++];
+                            deltaTime = (deltaTime << 7) | (byte & 0x7F);
+                        } while (byte & 0x80);
+                        
+                        if (pos >= trackEnd) break;
+                        
+                        let eventByte = result[pos];
+                        let actualEventByte = eventByte;
+                        
+                        // Handle running status
+                        if (eventByte < 0x80) {
+                            actualEventByte = runningStatus;
+                            pos--; // Don't advance past the data byte
+                        } else {
+                            runningStatus = eventByte;
+                        }
+                        
+                        pos++; // Move past event byte
+                        
+                        const eventType = actualEventByte & 0xF0;
+                        const channel = actualEventByte & 0x0F;
+                        
+                        // Note On events (0x90-0x9F)
+                        if (eventType === 0x90) {
+                            if (pos + 1 < trackEnd) {
+                                const note = result[pos];
+                                const velocity = result[pos + 1];
+                                
+                                if (velocity > 0) { // Only modify if it's actually a note on
+                                    const newVelocity = Math.min(127, Math.max(1, Math.round(velocity * multiplier)));
+                                    if (newVelocity !== velocity) {
+                                        result[pos + 1] = newVelocity;
+                                        eventsModified++;
+                                    }
+                                }
+                                pos += 2;
+                            }
+                        }
+                        // Note Off events (0x80-0x8F)
+                        else if (eventType === 0x80) {
+                            if (pos + 1 < trackEnd) {
+                                const note = result[pos];
+                                const velocity = result[pos + 1];
+                                
+                                const newVelocity = Math.min(127, Math.max(0, Math.round(velocity * multiplier)));
+                                if (newVelocity !== velocity) {
+                                    result[pos + 1] = newVelocity;
+                                    eventsModified++;
+                                }
+                                pos += 2;
+                            }
+                        }
+                        // Control Change events (0xB0-0xBF)
+                        else if (eventType === 0xB0) {
+                            if (pos + 1 < trackEnd) {
+                                const controller = result[pos];
+                                const value = result[pos + 1];
+                                
+                                // Volume (7), Expression (11), or Channel Volume (39)
+                                if (controller === 7 || controller === 11 || controller === 39) {
+                                    const newValue = Math.min(127, Math.max(0, Math.round(value * multiplier)));
+                                    if (newValue !== value) {
+                                        result[pos + 1] = newValue;
+                                        eventsModified++;
+                                    }
+                                }
+                                pos += 2;
+                            }
+                        }
+                        // Polyphonic Key Pressure (0xA0-0xAF)
+                        else if (eventType === 0xA0) {
+                            if (pos + 1 < trackEnd) {
+                                pos += 2;
+                            }
+                        }
+                        // Program Change (0xC0-0xCF)
+                        else if (eventType === 0xC0) {
+                            if (pos < trackEnd) {
+                                pos += 1;
+                            }
+                        }
+                        // Channel Pressure (0xD0-0xDF)
+                        else if (eventType === 0xD0) {
+                            if (pos < trackEnd) {
+                                pos += 1;
+                            }
+                        }
+                        // Pitch Bend (0xE0-0xEF)
+                        else if (eventType === 0xE0) {
+                            if (pos + 1 < trackEnd) {
+                                pos += 2;
+                            }
+                        }
+                        // Meta events (0xFF)
+                        else if (actualEventByte === 0xFF) {
+                            if (pos < trackEnd) {
+                                const metaType = result[pos++];
+                                
+                                // Read variable-length quantity for data length
+                                let dataLength = 0;
+                                do {
+                                    if (pos >= trackEnd) break;
+                                    byte = result[pos++];
+                                    dataLength = (dataLength << 7) | (byte & 0x7F);
+                                } while (byte & 0x80);
+                                
+                                pos += dataLength; // Skip meta event data
+                            }
+                        }
+                        // System Exclusive (0xF0, 0xF7)
+                        else if (actualEventByte === 0xF0 || actualEventByte === 0xF7) {
+                            // Read variable-length quantity for data length
+                            let dataLength = 0;
+                            do {
+                                if (pos >= trackEnd) break;
+                                byte = result[pos++];
+                                dataLength = (dataLength << 7) | (byte & 0x7F);
+                            } while (byte & 0x80);
+                            
+                            pos += dataLength; // Skip sysex data
+                        }
+                        else {
+                            // Unknown event, try to skip safely
+                            pos++;
+                        }
+                    }
+                    
+                    offset = trackEnd;
+                } else {
+                    offset++;
+                }
+            }
+            
+            console.log(`Modified ${eventsModified} MIDI events`);
+            return result.buffer;
+        }
+
+        // Initialize
+        updateVolume();
+    </script>
+</body>
+</html>
